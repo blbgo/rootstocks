@@ -11,6 +11,7 @@ import (
 type Stock interface {
 	Ticker() string
 	Details() (*StockDetails, error)
+	Update(details *StockDetails) error
 }
 
 type stock struct {
@@ -45,4 +46,12 @@ func (r stock) Details() (*StockDetails, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func (r stock) Update(details *StockDetails) error {
+	value, err := json.Marshal(details)
+	if err != nil {
+		return err
+	}
+	return r.Item.UpdateValue(value)
 }
