@@ -8,7 +8,7 @@ import (
 
 // RootStocks provides access to a database of stocks
 type RootStocks interface {
-	CreateStock(ticker string, details StockDetails) (Stock, error)
+	CreateStock(ticker string, details *StockDetails) (Stock, error)
 	ReadStock(ticker string) (Stock, error)
 	RangeStocks(startTicker string, reverse bool, cb func(stock Stock) bool) error
 	RangeStockTickers(startTicker string, reverse bool, cb func(ticker string) bool) error
@@ -32,7 +32,7 @@ func New(theRoot root.Root) (RootStocks, error) {
 
 // **************** implement RootStocks
 
-func (r rootStocks) CreateStock(ticker string, details StockDetails) (Stock, error) {
+func (r rootStocks) CreateStock(ticker string, details *StockDetails) (Stock, error) {
 	value, err := json.Marshal(details)
 	if err != nil {
 		return nil, err
