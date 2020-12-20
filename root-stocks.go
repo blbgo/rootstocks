@@ -37,7 +37,7 @@ func (r rootStocks) CreateStock(ticker string, details *StockDetails) (Stock, er
 	if err != nil {
 		return nil, err
 	}
-	item, err := r.Item.CreateChild([]byte(ticker), value, nil)
+	item, err := r.Item.CreateChild(tickerToBytes(ticker), value, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (r rootStocks) CreateStock(ticker string, details *StockDetails) (Stock, er
 }
 
 func (r rootStocks) ReadStock(ticker string) (Stock, error) {
-	item, err := r.Item.ReadChild([]byte(ticker))
+	item, err := r.Item.ReadChild(tickerToBytes(ticker))
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (r rootStocks) RangeStocks(
 	cb func(stock Stock) bool,
 ) error {
 	return r.Item.RangeChildren(
-		[]byte(startTicker),
+		[]byte(startTicker), // maybe should be tickerToBytes(ticker)
 		0,
 		reverse,
 		func(item root.Item) bool {
@@ -80,4 +80,19 @@ func (r rootStocks) RangeStockTickers(
 			return cb(string(key))
 		},
 	)
+}
+
+func tickerToBytes(ticker string) []byte {
+	tickerBytes := []byte(ticker)
+	if len(tickerBytes) == 1 {
+		return append(tickerBytes, 0)
+	}
+	return tickerBytes
+}
+
+func tickerFromBytes(key []byte) string {
+	if len(key) == 2 && key[1] == 0 {
+		return string(key[:1])
+	}
+	return string(key)
 }

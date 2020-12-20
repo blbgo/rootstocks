@@ -36,7 +36,7 @@ type StockDetails struct {
 }
 
 func (r stock) Ticker() string {
-	return string(r.Item.CopyKey(nil))
+	return tickerFromBytes(r.Item.CopyKey(nil))
 }
 
 func (r stock) Details() (*StockDetails, error) {
