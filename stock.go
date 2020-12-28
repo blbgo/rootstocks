@@ -1,7 +1,9 @@
 package rootstocks
 
 import (
+	"encoding/binary"
 	"encoding/json"
+	"time"
 
 	"github.com/blbgo/record/root"
 )
@@ -12,27 +14,30 @@ type Stock interface {
 	Ticker() string
 	Details() (*StockDetails, error)
 	Update(details *StockDetails) error
+	WriteBar(details BarDetails) error
+	RangeBars(duration BarDuration, start time.Time, reverse bool, cb func(bar Bar) bool) error
 }
 
 type stock struct {
 	root.Item
 }
 
+const (
+	childTypeDayBar byte = iota
+	childTypeMinuteBar
+)
+
 // StockDetails is a collection of data about a stock
 type StockDetails struct {
-	Name          string
-	Sector        string
-	WeightPercent float32
-	SharesInETF   uint64
-	CUSIP         string
-	ISIN          string
-	SEDOL         string
-	//Price
+	Name     string
+	Sector   string
+	CUSIP    string
+	ISIN     string
+	SEDOL    string
 	Location string
 	Exchange string
 	Currency string
-	//FX Rate
-	MarketCurrency string
+	MemberOf []string
 }
 
 func (r stock) Ticker() string {
@@ -54,4 +59,36 @@ func (r stock) Update(details *StockDetails) error {
 		return err
 	}
 	return r.Item.UpdateValue(value)
+}
+
+func (r stock) WriteBar(details BarDetails) error {
+	value, err := json.Marshal(details)
+	if err != nil {
+		return err
+	}
+	key := make([]byte, 9)
+	key[0] = byte(details.Duration)
+	binary.BigEndian.PutUint64(key[1:], uint64(details.Timestamp.Unix()))
+	item, err := r.Item.ReadChild(key)
+	if err == root.ErrItemNotFound {
+		return r.Item.QuickChild(key, value)
+	}
+	if err != nil {
+		return err
+	}
+	return item.UpdateValue(value)
+}
+
+func (r stock) RangeBars(
+	duration BarDuration,
+	start time.Time,
+	reverse bool,
+	cb func(bar Bar) bool,
+) error {
+	startKey := make([]byte, 9)
+	startKey[0] = byte(duration)
+	binary.BigEndian.PutUint64(startKey[1:], uint64(start.Unix()))
+	return r.Item.RangeChildren(startKey, 1, reverse, func(item root.Item) bool {
+		return cb(bar{Item: item})
+	})
 }

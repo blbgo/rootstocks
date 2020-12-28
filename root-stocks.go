@@ -2,6 +2,7 @@ package rootstocks
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/blbgo/record/root"
 )
@@ -13,6 +14,9 @@ type RootStocks interface {
 	RangeStocks(startTicker string, reverse bool, cb func(stock Stock) bool) error
 	RangeStockTickers(startTicker string, reverse bool, cb func(ticker string) bool) error
 }
+
+// ErrBarIndexWrongLength bar record index is not 9 bytes long
+var ErrBarIndexWrongLength = errors.New("Bar record index is not 9 bytes long")
 
 type rootStocks struct {
 	root.Item
