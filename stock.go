@@ -37,6 +37,7 @@ type StockDetails struct {
 	Location string
 	Exchange string
 	Currency string
+	R3kRank  uint32
 	MemberOf []string
 }
 
