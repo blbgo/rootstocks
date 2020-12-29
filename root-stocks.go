@@ -62,7 +62,7 @@ func (r rootStocks) RangeStocks(
 	cb func(stock Stock) bool,
 ) error {
 	return r.Item.RangeChildren(
-		[]byte(startTicker), // maybe should be tickerToBytes(ticker)
+		[]byte(startTicker),
 		0,
 		reverse,
 		func(item root.Item) bool {
@@ -81,7 +81,7 @@ func (r rootStocks) RangeStockTickers(
 		0,
 		reverse,
 		func(key []byte) bool {
-			return cb(string(key))
+			return cb(tickerFromBytes(key))
 		},
 	)
 }
