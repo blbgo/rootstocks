@@ -18,11 +18,23 @@ type RootStocks interface {
 // ErrBarIndexWrongLength bar record index is not 9 bytes long
 var ErrBarIndexWrongLength = errors.New("Bar record index is not 9 bytes long")
 
+// ErrBarValueWrongLength bar record value is wrong length
+var ErrBarValueWrongLength = errors.New("Bar record value is wrong length")
+
+// ErrNilArgument bar record value is wrong length
+var ErrNilArgument = errors.New("Argument in nil")
+
+// ErrInvalidNotePrefix note key prefix is invalid
+var ErrInvalidNotePrefix = errors.New("Note key prefix invalid")
+
+// ErrNoteWithTimeAlreadyExists Note with time already exists
+var ErrNoteWithTimeAlreadyExists = errors.New("Note with time already exists")
+
 type rootStocks struct {
 	root.Item
 }
 
-// New creates a PersistentState implemented by recordState
+// New creates a RootStocks implemented by rootStocks
 func New(theRoot root.Root) (RootStocks, error) {
 	item, err := theRoot.RootItem(
 		"github.com/blbgo/rootstocks",
